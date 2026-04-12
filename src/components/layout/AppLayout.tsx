@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useSensorStore } from '@/store/useSensorStore';
 import { useRoomStore } from '@/store/useRoomStore';
 import { useAlertStore } from '@/store/useAlertStore';
@@ -55,15 +56,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center border-b border-border px-4 gap-3 bg-card/50 backdrop-blur-sm">
-            <SidebarTrigger />
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground text-xs font-bold">X</span>
+          <header className="h-14 flex items-center border-b border-border px-4 gap-3 bg-card/50 backdrop-blur-sm justify-between">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground text-xs font-bold">X</span>
+                </div>
+                <h1 className="text-lg font-bold tracking-tight">XIOT</h1>
+                <span className="text-xs text-muted-foreground hidden sm:block">Cognitive Smart Home</span>
               </div>
-              <h1 className="text-lg font-bold tracking-tight">XIOT</h1>
-              <span className="text-xs text-muted-foreground hidden sm:block">Cognitive Smart Home</span>
             </div>
+            <ThemeToggle />
           </header>
           <main className="flex-1 overflow-auto">{children}</main>
         </div>

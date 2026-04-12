@@ -1,4 +1,4 @@
-import { Home, Bell, Plus, Sofa, Bed, CookingPot, Trash2, Box } from 'lucide-react';
+import { Home, Bell, Plus, Sofa, Bed, CookingPot, Trash2, Box, Settings } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -63,6 +63,14 @@ export function AppSidebar() {
                           )}
                         </span>
                       )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/settings" end activeClassName="bg-accent text-accent-foreground font-medium">
+                      <Settings className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Settings</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
