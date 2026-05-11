@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     model_path: str = "backend/models/smart_home_model.pkl"
 
     cors_origins: list[str] = ["http://localhost:8080", "http://127.0.0.1:8080"]
-    allowed_hosts: list[str] = ["localhost", "127.0.0.1", "0.0.0.0"]
+    allowed_hosts: list[str] = ["localhost", "127.0.0.1", "0.0.0.0", "testserver"]
 
     rate_limit_requests_per_minute: int = 120
 

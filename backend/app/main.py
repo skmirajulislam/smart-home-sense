@@ -5,11 +5,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from app.api.router import router as api_router
-from app.core.config import settings
-from app.core.rate_limiter import RateLimitMiddleware
-from app.core.security import SecurityHeadersMiddleware
-from app.db.base import create_schema
+from backend.app.api.compat_router import router as compat_router
+from backend.app.api.router import router as api_router
+from backend.app.core.config import settings
+from backend.app.core.rate_limiter import RateLimitMiddleware
+from backend.app.core.security import SecurityHeadersMiddleware
+from backend.app.db.base import create_schema
 
 
 @asynccontextmanager
@@ -24,6 +25,7 @@ app = FastAPI(
     version="0.2.0",
     lifespan=lifespan,
 )
+create_schema()
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,3 +44,4 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.include_router(api_router)
+app.include_router(compat_router)

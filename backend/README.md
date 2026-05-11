@@ -1,55 +1,40 @@
-# Smart Home Sense Backend (FastAPI)
+# Smart Home Sense Backend
 
-This backend exposes ML-ready APIs for your dashboard using a `.pkl` model file.
+FastAPI backend implementing the current pipeline in software:
 
-## Endpoints
+`Sensors (simulated frontend) -> Backend API -> Database -> Explanation Engine -> Dashboard`
 
-1. `POST /predict`
-2. `POST /explain`
-3. `GET /health` (recommended extra endpoint)
+## Layers implemented
 
-## Request body (`/predict` and `/explain`)
+- Sensor Layer: simulated sensor payloads from frontend
+- Edge/Communication Layer: modeled via telemetry ingest/analyze API contracts
+- Backend Layer: FastAPI modular controllers/services/repositories
+- Database Layer: SQLite via SQLAlchemy (`telemetry_events`, `analysis_events`)
+- Explanation Layer: model contribution + optional Groq LLM enhancement
+- Frontend Dashboard Layer: consumes `/api/v1/telemetry/analyze`
 
-```json
-{
-  "temperature": 38,
-  "humidity": 85,
-  "aqi": 180,
-  "gas": 250,
-  "motion": 1
-}
-```
+## API routes
 
-## Example `/predict` response
+### Core
+- `GET /health`
+- `POST /predict`
+- `POST /explain`
 
-```json
-{
-  "prediction": "Danger",
-  "model_source": "pkl",
-  "prediction_index": 2,
-  "probabilities": {
-    "Safe": 0.01,
-    "Warning": 0.15,
-    "Danger": 0.84
-  }
-}
-```
+### Versioned (recommended)
+- `GET /api/v1/health`
+- `POST /api/v1/predictions/predict`
+- `POST /api/v1/predictions/explain`
+- `POST /api/v1/telemetry/ingest`
+- `POST /api/v1/telemetry/analyze`
 
-## Example `/explain` response
+## Security and reliability
 
-```json
-{
-  "prediction": "Danger",
-  "shap_values": {
-    "gas": 45,
-    "aqi": 32,
-    "humidity": 15,
-    "temperature": 8
-  },
-  "explanation": "Elevated gas and aqi are the primary drivers of dangerous conditions.",
-  "model_source": "pkl"
-}
-```
+- CORS allowlist from environment
+- Trusted host validation
+- Security headers middleware
+- GZip compression
+- IP+path request rate limiting (429 on overflow)
+- `uvicorn --workers N` support for multi-process load distribution
 
 ## Setup
 
@@ -58,21 +43,18 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
 ```
 
-## Model file location
-
-Place your trained model at:
-
-`backend/models/smart_home_model.pkl`
-
-Or set:
-
-`MODEL_PATH=/absolute/or/relative/path/to/model.pkl`
-
-## Run server
+## Run
 
 ```bash
 cd /path/to/smart-home-sense
 uvicorn backend.app.main:app --reload --port 8000
+```
+
+For higher concurrency:
+
+```bash
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --workers 4
 ```

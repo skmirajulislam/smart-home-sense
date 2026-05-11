@@ -3,3 +3,7 @@ uvicorn[standard]==0.34.2
 numpy==2.2.5
 joblib==1.5.0
 scikit-learn==1.6.1
+SQLAlchemy==2.0.40
+pydantic-settings==2.9.1
+httpx==0.28.1
+pandas==2.2.3

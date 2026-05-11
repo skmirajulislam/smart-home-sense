@@ -5,7 +5,6 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useSensorStore } from '@/store/useSensorStore';
 import { useRoomStore } from '@/store/useRoomStore';
 import { useAlertStore } from '@/store/useAlertStore';
-import { getThresholdStatus } from '@/services/thresholds';
 import { SensorType } from '@/types/sensor';
 import { toast } from 'sonner';
 
@@ -24,7 +23,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   // Tick every 2.5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      tick();
+      void tick();
     }, 2500);
     return () => clearInterval(interval);
   }, [tick]);
@@ -49,7 +48,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         }
       }
     }
-  }, [roomSensors]);
+  }, [roomSensors, rooms, addAlert]);
 
   return (
     <SidebarProvider>
