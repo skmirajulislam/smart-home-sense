@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from backend.app.repositories.analysis_repository import AnalysisRepository
-from backend.app.repositories.telemetry_repository import TelemetryRepository
-from backend.app.schemas.prediction import PredictionRequest
-from backend.app.schemas.telemetry import AnalyzeRoomResult, RoomInsight, TelemetrySnapshot
-from backend.app.services.groq_service import GroqService
-from backend.app.services.model_service import ModelService
+from ..repositories.analysis_repository import AnalysisRepository
+from ..repositories.telemetry_repository import TelemetryRepository
+from ..schemas.prediction import PredictionRequest
+from ..schemas.telemetry import AnalyzeRoomResult, AnalysisTrace, ModelInputTrace, RoomInsight, SummarizerInputTrace, TelemetrySnapshot
+from ..services.groq_service import GroqService
+from ..services.model_service import ModelService
 
 
 SEVERITY_BY_PREDICTION = {"Safe": "info", "Warning": "warning", "Danger": "critical"}
@@ -18,10 +18,12 @@ SEVERITY_BY_PREDICTION = {"Safe": "info", "Warning": "warning", "Danger": "criti
 class AnalyzeResult:
     prediction: str
     prediction_index: int | None
+    probabilities: dict[str, float] | None
     model_source: str
     shap_values: dict[str, int]
     explanation: str
     llm_source: str
+    ai_analyzed: bool
 
 
 class AnalysisService:
@@ -37,7 +39,9 @@ class AnalysisService:
         if snapshot.sensors.gas is not None:
             return float(snapshot.sensors.gas)
         door_factor = 25 if snapshot.sensors.door == 0 else -10
-        return max(0.0, round(snapshot.sensors.airQuality * 1.2 + door_factor, 2))
+        derived = max(0.0, round(snapshot.sensors.airQuality * 1.2 + door_factor, 2))
+        # Clamp to expected frontend range [0, 1000]
+        return min(derived, 1000.0)
 
     @staticmethod
     def _base_explanation(prediction: str, shap_values: dict[str, int], motion: int) -> str:
@@ -64,7 +68,13 @@ class AnalysisService:
     ) -> RoomInsight:
         severity = SEVERITY_BY_PREDICTION.get(prediction, "warning")
         timestamp = int(time.time() * 1000)
-        sensor_map = {"aqi": "airQuality", "gas": "airQuality", "temperature": "temperature", "humidity": "humidity"}
+        sensor_map = {
+            "aqi": "airQuality",
+            "gas": "gas",
+            "temperature": "temperature",
+            "humidity": "humidity",
+            "motion": "motion",
+        }
         contributors = []
         for key, value in shap_values.items():
             if value <= 0:
@@ -112,22 +122,34 @@ class AnalysisService:
             gas=gas,
             motion=snapshot.sensors.motion,
         )
-        prediction, prediction_index, _, model_source = self.model_service.predict(payload)
+        model_input = ModelInputTrace(
+            temperature=payload.temperature,
+            humidity=payload.humidity,
+            aqi=payload.aqi,
+            gas=payload.gas,
+            motion=payload.motion,
+        )
+        prediction, prediction_index, probabilities, model_source = self.model_service.predict(payload)
         shap_values = self.model_service.shap_contributions(payload)
         base_explanation = self._base_explanation(prediction, shap_values, payload.motion)
-
-        final_explanation, llm_source = await self.groq_service.explain(
+        summarizer_input = SummarizerInputTrace(
             prediction=prediction,
-            shap_values=shap_values,
-            input_payload={
-                "temperature": payload.temperature,
-                "humidity": payload.humidity,
-                "aqi": payload.aqi,
-                "gas": payload.gas,
-                "motion": payload.motion,
-            },
-            base_explanation=base_explanation,
+            shapValues=shap_values,
+            inputSensors=model_input,
+            draftExplanation=base_explanation,
         )
+
+        ai_analyzed = prediction != "Safe"
+        if ai_analyzed:
+            final_explanation, llm_source = await self.groq_service.explain(
+                prediction=prediction,
+                shap_values=shap_values,
+                input_payload=model_input.model_dump(),
+                base_explanation=base_explanation,
+            )
+        else:
+            final_explanation = base_explanation
+            llm_source = "skipped_safe_prediction"
 
         insight = self._insight_from_prediction(snapshot.roomId, prediction, final_explanation, shap_values)
 
@@ -145,7 +167,16 @@ class AnalysisService:
             roomId=snapshot.roomId,
             prediction=prediction,
             predictionIndex=prediction_index,
+            probabilities=probabilities,
             modelSource=model_source,
             llmSource=llm_source,
+            aiAnalyzed=ai_analyzed,
+            shapValues=shap_values,
+            sensors=snapshot.sensors.model_copy(update={"gas": gas}),
             insight=insight,
+            trace=AnalysisTrace(
+                modelInput=model_input,
+                summarizerInput=summarizer_input,
+                summarizerOutput=final_explanation,
+            ),
         )

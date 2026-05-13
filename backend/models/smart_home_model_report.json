@@ -1,0 +1,64 @@
+{
+  "selected_model": "random_forest",
+  "cross_validation_weighted_f1": {
+    "random_forest": 0.8500878033016963,
+    "logistic_regression": 0.6747946763581458
+  },
+  "train_accuracy": 0.8738571428571429,
+  "test_accuracy": 0.8484761904761905,
+  "test_weighted_f1": 0.8515413405298486,
+  "classification_report": {
+    "Danger": {
+      "precision": 0.8068181818181818,
+      "recall": 0.8762585254952907,
+      "f1-score": 0.8401058695313717,
+      "support": 3079.0
+    },
+    "Safe": {
+      "precision": 0.63659628918746,
+      "recall": 0.9539789069990412,
+      "f1-score": 0.7636224098234843,
+      "support": 1043.0
+    },
+    "Warning": {
+      "precision": 0.9325943143214732,
+      "recall": 0.8178112260896833,
+      "f1-score": 0.8714393116698689,
+      "support": 6378.0
+    },
+    "accuracy": 0.8484761904761905,
+    "macro avg": {
+      "precision": 0.7920029284423716,
+      "recall": 0.8826828861946717,
+      "f1-score": 0.8250558636749084,
+      "support": 10500.0
+    },
+    "weighted avg": {
+      "precision": 0.8663094903031484,
+      "recall": 0.8484761904761905,
+      "f1-score": 0.8515413405298486,
+      "support": 10500.0
+    }
+  },
+  "label_distribution": {
+    "Warning": 31892,
+    "Danger": 15393,
+    "Safe": 5215
+  },
+  "feature_importance": {
+    "gas": 0.296637,
+    "aqi": 0.27442,
+    "temperature": 0.210964,
+    "humidity": 0.151866,
+    "motion": 0.066113
+  },
+  "features": [
+    "temperature",
+    "humidity",
+    "motion",
+    "gas",
+    "aqi"
+  ],
+  "dataset_rows": 52500,
+  "synthetic_samples_added": 2500
+}

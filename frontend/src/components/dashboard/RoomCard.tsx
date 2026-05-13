@@ -1,6 +1,5 @@
 import { Room } from '@/types/room';
 import { useSensorStore } from '@/store/useSensorStore';
-import { SensorType } from '@/types/sensor';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { Sofa, Bed, CookingPot, Box, ChevronRight } from 'lucide-react';
@@ -52,14 +51,14 @@ export function RoomCard({ room, index }: { room: Room; index: number }) {
               </div>
               <div>
                 <h3 className="font-semibold">{room.name}</h3>
-                <p className="text-xs text-muted-foreground">6 sensors active</p>
+                <p className="text-xs text-muted-foreground">{sensorList.length} sensors active</p>
               </div>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            {sensorList.slice(0, 4).map((s) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {sensorList.map((s) => (
               <div key={s.type} className="flex items-center gap-1.5">
                 <div className={cn('h-1.5 w-1.5 rounded-full', statusDot[s.status])} />
                 <span className="text-xs text-muted-foreground truncate">

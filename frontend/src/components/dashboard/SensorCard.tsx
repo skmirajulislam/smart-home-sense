@@ -1,6 +1,6 @@
 import { SensorData, SensorType } from '@/types/sensor';
 import { SENSOR_CONFIGS } from '@/services/thresholds';
-import { Thermometer, Droplets, Wind, Activity, Sun, DoorOpen, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Thermometer, Droplets, Wind, Activity, Sun, DoorOpen, TrendingUp, TrendingDown, Minus, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Area, AreaChart, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
@@ -9,6 +9,7 @@ const iconMap: Record<SensorType, React.ComponentType<{ className?: string }>> =
   temperature: Thermometer,
   humidity: Droplets,
   airQuality: Wind,
+  gas: Flame,
   motion: Activity,
   light: Sun,
   door: DoorOpen,

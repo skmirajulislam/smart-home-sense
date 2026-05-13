@@ -1,7 +1,7 @@
 from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
 from sqlalchemy.sql import func
 
-from backend.app.db.base import Base
+from .base import Base
 
 
 class TelemetryEvent(Base):

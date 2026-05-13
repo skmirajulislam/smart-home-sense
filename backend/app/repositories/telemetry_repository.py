@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from backend.app.db.models import TelemetryEvent
-from backend.app.schemas.telemetry import TelemetrySnapshot
+from ..db.models import TelemetryEvent
+from ..schemas.telemetry import TelemetrySnapshot
 
 
 class TelemetryRepository:

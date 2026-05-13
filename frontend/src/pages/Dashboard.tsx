@@ -4,13 +4,14 @@ import { useAlertStore } from '@/store/useAlertStore';
 import { RoomCard } from '@/components/dashboard/RoomCard';
 import { Activity, Box, AlertTriangle, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { SENSOR_CONFIGS } from '@/services/thresholds';
 
 export default function Dashboard() {
   const rooms = useRoomStore((s) => s.rooms);
   const roomSensors = useSensorStore((s) => s.roomSensors);
   const alerts = useAlertStore((s) => s.alerts);
 
-  const totalSensors = rooms.length * 6;
+  const totalSensors = rooms.length * Object.keys(SENSOR_CONFIGS).length;
   const criticalAlerts = alerts.filter((a) => a.severity === 'critical' && !a.read).length;
 
   const allSafe = Object.values(roomSensors).every((sensors) =>

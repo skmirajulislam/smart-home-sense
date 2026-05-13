@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from backend.app.db.models import AnalysisEvent
+from ..db.models import AnalysisEvent
 
 
 class AnalysisRepository:

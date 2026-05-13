@@ -11,7 +11,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sofa, Bed, CookingPot, Box,
 };
 
-const SENSOR_ORDER: SensorType[] = ['temperature', 'humidity', 'airQuality', 'motion', 'light', 'door'];
+const SENSOR_ORDER: SensorType[] = ['temperature', 'humidity', 'airQuality', 'gas', 'motion', 'light', 'door'];
 
 export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +31,8 @@ export default function RoomDetail() {
     Temp: sensors.temperature.history[i]?.value ?? 0,
     Humidity: sensors.humidity.history[i]?.value ?? 0,
     AQI: sensors.airQuality.history[i]?.value ?? 0,
+    Gas: sensors.gas.history[i]?.value ?? 0,
+    Light: sensors.light.history[i]?.value ?? 0,
   }));
 
   return (
@@ -75,6 +77,8 @@ export default function RoomDetail() {
                   <Line type="monotone" dataKey="Temp" stroke="#10b981" strokeWidth={2} dot={false} />
                   <Line type="monotone" dataKey="Humidity" stroke="#3b82f6" strokeWidth={2} dot={false} />
                   <Line type="monotone" dataKey="AQI" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="Gas" stroke="#ef4444" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="Light" stroke="#a855f7" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

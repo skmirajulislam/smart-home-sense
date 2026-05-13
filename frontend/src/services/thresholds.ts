@@ -35,6 +35,16 @@ export const SENSOR_CONFIGS: Record<SensorType, SensorConfig> = {
     warningHigh: 100,
     criticalHigh: 200,
   },
+  gas: {
+    type: 'gas',
+    label: 'Gas',
+    unit: 'ppm',
+    icon: 'Wind',
+    min: 0,
+    max: 1000,
+    warningHigh: 300,
+    criticalHigh: 800,
+  },
   motion: {
     type: 'motion',
     label: 'Motion',

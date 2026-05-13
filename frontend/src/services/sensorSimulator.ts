@@ -1,5 +1,5 @@
 import { SensorType, SensorData, TrendDirection } from '@/types/sensor';
-import { SENSOR_CONFIGS, getThresholdStatus } from './thresholds';
+import { SENSOR_CONFIGS, getThresholdStatus } from '@/services/thresholds';
 
 const HISTORY_SIZE = 20;
 
@@ -24,6 +24,7 @@ const INITIAL_VALUES: Record<SensorType, number> = {
   temperature: 24,
   humidity: 45,
   airQuality: 42,
+  gas: 80,
   motion: 0,
   light: 350,
   door: 0,
@@ -32,19 +33,24 @@ const INITIAL_VALUES: Record<SensorType, number> = {
 export function createInitialSensorData(): Record<SensorType, SensorData> {
   const now = Date.now();
   const result = {} as Record<SensorType, SensorData>;
-  const types: SensorType[] = ['temperature', 'humidity', 'airQuality', 'motion', 'light', 'door'];
+  const types: SensorType[] = ['temperature', 'humidity', 'airQuality', 'gas', 'motion', 'light', 'door'];
 
   for (const type of types) {
     const config = SENSOR_CONFIGS[type];
-    const baseVal = INITIAL_VALUES[type] + (Math.random() - 0.5) * 4;
-    const val = clamp(baseVal, config.min, config.max);
+    let val: number;
+    if (type === 'motion' || type === 'door') {
+      val = INITIAL_VALUES[type];
+    } else {
+      const baseVal = INITIAL_VALUES[type] + (Math.random() - 0.5) * 4;
+      val = clamp(baseVal, config.min, config.max);
+    }
     result[type] = {
       type,
-      currentValue: Math.round(val * 10) / 10,
+      currentValue: type === 'motion' || type === 'door' ? Math.round(val) : Math.round(val * 10) / 10,
       unit: config.unit,
       trend: 'stable',
       status: getThresholdStatus(type, val),
-      history: [{ value: Math.round(val * 10) / 10, timestamp: now }],
+      history: [{ value: type === 'motion' || type === 'door' ? Math.round(val) : Math.round(val * 10) / 10, timestamp: now }],
     };
   }
   return result;
@@ -63,9 +69,10 @@ export function simulateSensorUpdate(sensors: Record<SensorType, SensorData>): R
     if (type === 'motion') {
       newVal = Math.random() > 0.7 ? 1 : 0;
     } else if (type === 'door') {
-      newVal = Math.random() > 0.95 ? (prev.currentValue === 0 ? 1 : 0) : prev.currentValue;
+      const prevDoor = prev.currentValue >= 0.5 ? 1 : 0;
+      newVal = Math.random() > 0.95 ? (prevDoor === 0 ? 1 : 0) : prevDoor;
     } else {
-      const step = type === 'temperature' ? 0.5 : type === 'humidity' ? 1.5 : type === 'airQuality' ? 5 : 20;
+      const step = type === 'temperature' ? 0.5 : type === 'humidity' ? 1.5 : type === 'airQuality' ? 5 : type === 'gas' ? 15 : 20;
       newVal = randomWalk(prev.currentValue, step, config.min, config.max);
 
       // Occasional anomaly spike
@@ -75,9 +82,12 @@ export function simulateSensorUpdate(sensors: Record<SensorType, SensorData>): R
       if (anomalyChance > 0.93 && type === 'airQuality') {
         newVal = clamp(newVal + 60, config.min, config.max);
       }
+      if (anomalyChance > 0.94 && type === 'gas') {
+        newVal = clamp(newVal + 180, config.min, config.max);
+      }
     }
 
-    newVal = Math.round(newVal * 10) / 10;
+    newVal = type === 'motion' || type === 'door' ? Math.round(newVal) : Math.round(newVal * 10) / 10;
     const newHistory = [...prev.history, { value: newVal, timestamp: now }].slice(-HISTORY_SIZE);
 
     updated[type] = {

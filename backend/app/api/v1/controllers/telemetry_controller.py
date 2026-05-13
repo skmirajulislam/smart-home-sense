@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.app.api.v1.controllers.dependencies import groq_service, model_service
-from backend.app.db.session import get_db
-from backend.app.schemas.telemetry import (
+from .dependencies import groq_service, model_service
+from ....db.session import get_db
+from ....schemas.telemetry import (
     AnalyzeTelemetryRequest,
     AnalyzeTelemetryResponse,
     IngestTelemetryRequest,
     IngestTelemetryResponse,
 )
-from backend.app.services.analysis_service import AnalysisService
+from ....services.analysis_service import AnalysisService
 
 router = APIRouter()
 
@@ -28,7 +28,10 @@ async def analyze_telemetry(
 ) -> AnalyzeTelemetryResponse:
     service = AnalysisService(db=db, model_service=model_service, groq_service=groq_service)
     results = []
-    for snapshot in payload.snapshots:
-        result = await service.analyze_snapshot(snapshot)
-        results.append(result)
+    try:
+        for snapshot in payload.snapshots:
+            result = await service.analyze_snapshot(snapshot)
+            results.append(result)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     return AnalyzeTelemetryResponse(results=results)

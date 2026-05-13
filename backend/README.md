@@ -4,6 +4,9 @@ FastAPI backend implementing the current pipeline in software:
 
 `Sensors (simulated frontend) -> Backend API -> Database -> Explanation Engine -> Dashboard`
 
+The prediction API uses a trained model artifact (`backend/models/smart_home_model.pkl`) produced from
+`backend/models/xiot_sensor_dataset_50000.csv`.
+
 ## Layers implemented
 
 - Sensor Layer: simulated sensor payloads from frontend
@@ -45,6 +48,19 @@ source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 ```
+
+## Train the model (required when dataset/model changes)
+
+```bash
+cd backend
+source .venv/bin/activate
+python models/model.py
+```
+
+This writes:
+
+- `backend/models/smart_home_model.pkl` (model + metadata)
+- `backend/models/smart_home_model_report.json` (metrics and class report)
 
 ## Run
 

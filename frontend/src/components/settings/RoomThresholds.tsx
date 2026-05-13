@@ -22,7 +22,7 @@ export function RoomThresholds({ roomId, roomName }: RoomThresholdsProps) {
   const getRoomThreshold = useSettingsStore((s) => s.getRoomThreshold);
   const [savedMessage, setSavedMessage] = useState(false);
 
-  const sensorTypes: SensorType[] = ['temperature', 'humidity', 'airQuality', 'light'];
+  const sensorTypes: SensorType[] = ['temperature', 'humidity', 'airQuality', 'gas', 'light'];
 
   const handleThresholdChange = (
     sensorType: SensorType,
@@ -66,10 +66,11 @@ export function RoomThresholds({ roomId, roomName }: RoomThresholdsProps) {
       </div>
 
       <Tabs defaultValue="temperature" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="temperature">Temp</TabsTrigger>
           <TabsTrigger value="humidity">Humidity</TabsTrigger>
           <TabsTrigger value="airQuality">Air Quality</TabsTrigger>
+          <TabsTrigger value="gas">Gas</TabsTrigger>
           <TabsTrigger value="light">Light</TabsTrigger>
         </TabsList>
 

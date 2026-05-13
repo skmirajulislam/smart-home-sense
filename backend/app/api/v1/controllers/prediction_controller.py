@@ -1,14 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
-from backend.app.api.v1.controllers.dependencies import groq_service, model_service
-from backend.app.schemas.prediction import ExplainResponse, PredictionRequest, PredictionResponse
+from .dependencies import groq_service, model_service
+from ....schemas.prediction import ExplainResponse, PredictionRequest, PredictionResponse
 
 router = APIRouter()
 
 
 @router.post("/predict", response_model=PredictionResponse)
 def predict(payload: PredictionRequest) -> PredictionResponse:
-    prediction, prediction_index, probabilities, model_source = model_service.predict(payload)
+    try:
+        prediction, prediction_index, probabilities, model_source = model_service.predict(payload)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     return PredictionResponse(
         prediction=prediction,
         prediction_index=prediction_index,
@@ -19,7 +22,10 @@ def predict(payload: PredictionRequest) -> PredictionResponse:
 
 @router.post("/explain", response_model=ExplainResponse)
 async def explain(payload: PredictionRequest) -> ExplainResponse:
-    prediction, _, _, model_source = model_service.predict(payload)
+    try:
+        prediction, _, _, model_source = model_service.predict(payload)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     shap_values = model_service.shap_contributions(payload)
     base_text = "Model explanation generated from current sensor contributions."
     explanation, llm_source = await groq_service.explain(

@@ -1,4 +1,4 @@
-export type SensorType = 'temperature' | 'humidity' | 'airQuality' | 'motion' | 'light' | 'door';
+export type SensorType = 'temperature' | 'humidity' | 'airQuality' | 'motion' | 'light' | 'door' | 'gas';
 
 export type ThresholdStatus = 'safe' | 'warning' | 'critical';
 export type TrendDirection = 'up' | 'down' | 'stable';
